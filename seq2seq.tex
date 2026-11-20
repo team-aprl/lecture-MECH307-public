@@ -1,0 +1,111 @@
+\documentclass[border=5pt]{standalone}
+\usepackage{tikz}
+\usepackage{xcolor}
+\usepackage{kotex} % 한글 지원
+\usetikzlibrary{positioning, arrows.meta, shapes.geometric}
+
+\begin{document}
+\begin{tikzpicture}[
+    node distance=1cm and 0.8cm,
+    rnn/.style={rectangle, rounded corners, draw=blue!60, fill=blue!20, minimum width=1cm, minimum height=0.8cm},
+    word/.style={rectangle, draw=gray!60, fill=gray!10, minimum width=1.2cm, minimum height=0.6cm, font=\small},
+    arrow/.style={->, >=Stealth, thick},
+    hidden/.style={circle, draw=red!60, fill=red!20, minimum size=0.6cm, font=\tiny},
+]
+
+% Title
+\node[font=\Large\bfseries] at (0, 4.5) {Seq2Seq Translation Model};
+
+% Input sequence (English)
+\node[word] (input1) at (-4, 2) {Introduction};
+\node[word] (input2) [right=of input1] {to};
+\node[word] (input3) [right=of input2] {AI};
+\node[word] (input4) [right=of input3] {<EOS>};
+
+% Encoder RNN cells
+\node[rnn] (enc1) [below=of input1] {RNN};
+\node[rnn] (enc2) [below=of input2] {RNN};
+\node[rnn] (enc3) [below=of input3] {RNN};
+\node[rnn] (enc4) [below=of input4] {RNN};
+
+% Hidden states for encoder
+\node[hidden] (h1) [below=0.3cm of enc1] {$h_1$};
+\node[hidden] (h2) [below=0.3cm of enc2] {$h_2$};
+\node[hidden] (h3) [below=0.3cm of enc3] {$h_3$};
+\node[hidden] (h4) [below=0.3cm of enc4] {$h_4$};
+
+% Context vector
+\node[hidden, fill=green!20, draw=green!60, minimum size=1cm] (context) at (0, -1) {Context};
+
+% Decoder RNN cells
+\node[rnn, fill=orange!20, draw=orange!60] (dec1) at (-2, -3) {RNN};
+\node[rnn, fill=orange!20, draw=orange!60] (dec2) [right=1.5cm of dec1] {RNN};
+\node[rnn, fill=orange!20, draw=orange!60] (dec3) [right=1.5cm of dec2] {RNN};
+
+% Decoder hidden states
+\node[hidden, fill=orange!20, draw=orange!60] (dh1) [below=0.3cm of dec1] {$s_1$};
+\node[hidden, fill=orange!20, draw=orange!60] (dh2) [below=0.3cm of dec2] {$s_2$};
+\node[hidden, fill=orange!20, draw=orange!60] (dh3) [below=0.3cm of dec3] {$s_3$};
+
+% Output sequence (Korean)
+\node[word] (output1) [below=of dh1] {인공지능};
+\node[word] (output2) [below=of dh2] {개론};
+\node[word] (output3) [below=of dh3] {<EOS>};
+
+% Input arrows
+\draw[arrow] (input1) -- (enc1);
+\draw[arrow] (input2) -- (enc2);
+\draw[arrow] (input3) -- (enc3);
+\draw[arrow] (input4) -- (enc4);
+
+% Encoder hidden state connections
+\draw[arrow] (enc1) -- (h1);
+\draw[arrow] (enc2) -- (h2);
+\draw[arrow] (enc3) -- (h3);
+\draw[arrow] (enc4) -- (h4);
+
+% Encoder sequence arrows
+\draw[arrow, blue] (h1) -- (h2);
+\draw[arrow, blue] (h2) -- (h3);
+\draw[arrow, blue] (h3) -- (h4);
+
+% Context vector connection
+\draw[arrow, green, thick] (h4) -- (context);
+
+% Decoder connections
+\draw[arrow, green, thick] (context) -- (dec1);
+\draw[arrow] (dec1) -- (dh1);
+\draw[arrow] (dec2) -- (dh2);
+\draw[arrow] (dec3) -- (dh3);
+
+% Decoder sequence arrows
+\draw[arrow, orange] (dh1) -- (dh2);
+\draw[arrow, orange] (dh2) -- (dh3);
+
+% Output arrows
+\draw[arrow] (dh1) -- (output1);
+\draw[arrow] (dh2) -- (output2);
+\draw[arrow] (dh3) -- (output3);
+
+% Start token
+\node[word] (start) at (-4, -3) {<SOS>};
+\draw[arrow] (start) -- (dec1);
+
+% Labels
+\node[font=\bfseries] at (-2, 2.5) {Input (English)};
+\node[font=\bfseries] at (-2, 0.5) {Encoder};
+\node[font=\bfseries] at (0, -2) {Decoder};
+\node[font=\bfseries] at (0, -4.5) {Output (Korean)};
+
+% Legend
+\node[draw, rectangle, fill=blue!10, minimum width=3cm, minimum height=2cm] at (4.5, 1) {};
+\node[font=\small\bfseries] at (4.5, 1.7) {Legend};
+\node[rnn, scale=0.7] at (3.8, 1.2) {};
+\node[font=\tiny] at (5.2, 1.2) {RNN Cell};
+\node[hidden, scale=0.7] at (3.8, 0.8) {};
+\node[font=\tiny] at (5.2, 0.8) {Hidden State};
+\node[hidden, fill=green!20, draw=green!60, scale=0.7] at (3.8, 0.4) {};
+\node[font=\tiny] at (5.2, 0.4) {Context Vector};
+
+\end{tikzpicture}
+\end{document}
